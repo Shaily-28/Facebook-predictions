@@ -4,59 +4,219 @@
   <meta charset="UTF-8" />
   <title>Reddit Score Prediction – Assignment 2</title>
   <style>
+    :root {
+      --reddit-orange: #ff4500;
+      --reddit-dark: #1a1a1b;
+      --reddit-blue: #0079d3;
+      --bg-light: #f6f7f8;
+      --card-bg: #ffffff;
+      --border-soft: #e1e4e8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      max-width: 900px;
+      max-width: 960px;
       margin: auto;
-      padding: 2rem;
-      line-height: 1.65;
-      background: #fafafa;
-      color: #222;
+      padding: 2rem 1.5rem 3rem;
+      line-height: 1.7;
+      background: radial-gradient(circle at top left, #ffe1d6 0, var(--bg-light) 40%, #eaf5ff 100%);
+      color: var(--reddit-dark);
     }
-    h1, h2, h3 {
-      font-weight: 600;
-      margin-top: 2rem;
-    }
+
     header {
-      border-bottom: 1px solid #ddd;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
+      margin-bottom: 2.5rem;
+      padding: 1.75rem 1.5rem 1.5rem;
+      border-radius: 16px;
+      background: linear-gradient(120deg, var(--reddit-orange), #ff7a45, var(--reddit-blue));
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+      position: relative;
+      overflow: hidden;
     }
+
+    header::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      bottom: -40px;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      filter: blur(2px);
+    }
+
+    h1 {
+      margin: 0 0 0.3rem;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    header p {
+      margin: 0.2rem 0 0.9rem;
+      font-size: 0.98rem;
+      opacity: 0.95;
+    }
+
+    nav {
+      margin-top: 0.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      position: relative;
+      z-index: 1;
+    }
+
     nav a {
-      margin-right: 1rem;
       text-decoration: none;
-      color: #0366d6;
+      color: #fff;
       font-weight: 500;
+      font-size: 0.9rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.55);
+      background: rgba(0,0,0,0.1);
+      backdrop-filter: blur(3px);
+      transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
     }
+
     nav a:hover {
-      text-decoration: underline;
+      background: rgba(255,255,255,0.18);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
+
+    .tagline {
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .members {
+      margin-top: 0.9rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.18);
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .members-label {
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.78rem;
+      opacity: 0.9;
+    }
+
+    .members span.name {
+      background: rgba(255,255,255,0.22);
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      white-space: nowrap;
+    }
+
     section {
-      margin-bottom: 3rem;
-      background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin-bottom: 2rem;
+      background: var(--card-bg);
+      padding: 1.5rem 1.4rem 1.6rem;
+      border-radius: 14px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 2px 9px rgba(0,0,0,0.03);
+      position: relative;
     }
+
+    section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      border-radius: 14px 0 0 14px;
+      background: linear-gradient(to bottom, var(--reddit-orange), var(--reddit-blue));
+      opacity: 0.7;
+    }
+
+    section h2 {
+      margin-top: 0;
+      margin-bottom: 0.6rem;
+      font-weight: 650;
+    }
+
+    section h3 {
+      margin-top: 1.2rem;
+      margin-bottom: 0.4rem;
+      font-size: 1.05rem;
+    }
+
     img {
       max-width: 100%;
-      border-radius: 6px;
-      margin: 1rem 0;
+      border-radius: 10px;
+      margin: 0.75rem 0 1.1rem;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
+
+    ul {
+      padding-left: 1.3rem;
+      margin-top: 0.3rem;
+    }
+
+    li {
+      margin-bottom: 0.2rem;
+    }
+
     .code {
-      background: #f3f3f3;
-      padding: 0.75rem;
-      border-radius: 6px;
-      font-family: monospace;
+      background: #18181b;
+      color: #f5f5f5;
+      padding: 0.8rem;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       white-space: pre-wrap;
-      font-size: 0.9rem;
-      border: 1px solid #e0e0e0;
+      font-size: 0.87rem;
+      border: 1px solid #2e2e32;
     }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0.4rem 0;
+    }
+
+    .pill {
+      font-size: 0.8rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: #fefefe;
+    }
+
     footer {
       text-align: center;
-      margin-top: 3rem;
-      font-size: 0.9rem;
-      color: #777;
+      margin-top: 2rem;
+      font-size: 0.88rem;
+      color: #555;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 1.3rem 1rem 2.5rem;
+      }
+      header {
+        padding: 1.4rem 1.2rem 1.2rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
     }
   </style>
 </head>
@@ -64,7 +224,17 @@
 <body>
   <header>
     <h1>Predicting Reddit Post Scores</h1>
-    <p>158/258 Assignment 2 • Machine Learning for Data Science</p>
+    <p>Assignment 2 • Data Mining and Recommender Systems</p>
+    <p class="tagline">
+      Modeling how title text, subreddit, and posting time relate to Reddit post popularity.
+    </p>
+
+    <div class="members">
+      <span class="members-label">Group Members</span>
+      <span class="name">Shaily Nieves Adame</span>
+      <span class="name">Tatianna Sanchez</span>
+    </div>
+
     <nav>
       <a href="#task">Task</a>
       <a href="#eda">EDA</a>
@@ -78,79 +248,96 @@
   <section id="task">
     <h2>1. Predictive Task</h2>
     <p>
-      The objective of this project is to <strong>predict the final score</strong> 
-      (upvotes minus downvotes) of a Reddit post 
-      <strong>at the moment it is submitted</strong>.
+      The objective of this project is to <strong>predict the final score</strong>
+      (upvotes minus downvotes) of a Reddit post <strong>at the moment it is submitted</strong>.
+      This is framed as a supervised <strong>regression</strong> problem.
     </p>
 
-    <h3>Input Features Used</h3>
+    <h3>Input Features</h3>
     <ul>
-      <li>Post title (text)</li>
-      <li>Subreddit (categorical)</li>
-      <li>Title length (# of characters)</li>
-      <li>Word count (# of title words)</li>
-      <li>Posting hour, day of week, and month</li>
+      <li>Post title (raw text)</li>
+      <li>Subreddit (categorical community identifier)</li>
+      <li>Title length: number of characters</li>
+      <li>Word count: number of words in the title</li>
+      <li>Posting time: hour of day, day of week, and month</li>
     </ul>
 
-    <h3>Output</h3>
+    <h3>Target Variable</h3>
     <p>
-      A numeric prediction of the Reddit post’s score (regression problem).
+      The target is the Reddit <strong>score</strong> of each post, defined as:
     </p>
+    <div class="pill-row">
+      <span class="pill">score = upvotes − downvotes</span>
+      <span class="pill">real-valued output</span>
+      <span class="pill">heavy-tailed distribution</span>
+    </div>
   </section>
 
   <section id="eda">
     <h2>2. Data & Exploratory Analysis</h2>
 
     <h3>Score Distribution</h3>
-    <p>The score distribution is highly skewed with a long right tail:</p>
+    <p>
+      The score distribution is highly skewed with a long right tail:
+      most posts receive relatively modest scores, but a small fraction
+      of posts go "viral" and receive very high scores.
+    </p>
     <img src="plots/score_dist.png" alt="Score Distribution">
 
     <h3>Subreddit Popularity</h3>
     <p>
-      Subreddits vary widely in mean score and number of posts.
-      Larger communities produce more data but not necessarily higher mean scores.
+      Different subreddits exhibit very different typical scores and activity levels.
+      Some communities have higher mean scores but fewer posts, while others have
+      more moderate scores but large volumes of content.
     </p>
-    <img src="plots/subreddit_stats.png" alt="Subreddit Stats">
+    <img src="plots/subreddit_stats.png" alt="Subreddit Statistics">
   </section>
 
   <section id="features">
     <h2>3. Feature Engineering & Preprocessing</h2>
 
-    <p>I extracted features that encode content, timing, and subreddit context.</p>
+    <p>
+      I construct a feature representation that captures content,
+      community context, and posting time. These features are combined
+      in a single scikit-learn <strong>Pipeline</strong>.
+    </p>
 
     <h3>Final Feature Set</h3>
     <div class="code">
-text_features = ["title"] → TF–IDF (max_features=5000)
-categorical_features = ["subreddit"] → OneHotEncoder(handle_unknown="ignore")
-numeric_features = ["title_len", "word_count", "hour", "dayofweek", "month"]
+text_features      = ["title"]         → TF–IDF (max_features = 5000, English stopwords)
+categorical_feats  = ["subreddit"]     → OneHotEncoder(handle_unknown = "ignore")
+numeric_features   = ["title_len", "word_count", "hour", "dayofweek", "month"]
     </div>
 
     <p>
-      These transformations were combined using a 
-      <strong>ColumnTransformer</strong> inside a scikit-learn <strong>Pipeline</strong>.
-      This ensures no leakage from test data and a clean, reproducible workflow.
+      Numeric features use mean imputation for any missing values.
+      Text and categorical transformations are handled by a
+      <strong>ColumnTransformer</strong>, which keeps preprocessing
+      consistent between training and evaluation without leaking test data.
     </p>
   </section>
 
   <section id="models">
     <h2>4. Models</h2>
-    <p>I trained and compared several baseline models and two regression models:</p>
+    <p>I evaluate simple baselines and two linear regression models:</p>
 
     <h3>Baselines</h3>
     <ul>
-      <li>Global mean baseline</li>
-      <li>Global median baseline</li>
-      <li>Subreddit mean baseline</li>
+      <li><strong>Global mean baseline</strong> – always predicts the mean training score.</li>
+      <li><strong>Global median baseline</strong> – always predicts the median training score.</li>
+      <li><strong>Subreddit mean baseline</strong> – predicts the mean score for each subreddit.</li>
     </ul>
 
     <h3>Machine Learning Models</h3>
     <ul>
-      <li><strong>Linear Regression</strong> – standard least squares</li>
-      <li><strong>Ridge Regression</strong> – L2 regularized linear model</li>
+      <li><strong>Linear Regression</strong> – least squares regression in the combined feature space.</li>
+      <li><strong>Ridge Regression</strong> – linear model with L2 regularization to reduce overfitting.</li>
     </ul>
 
     <p>
-      Ridge helps avoid overfitting in the high-dimensional TF–IDF space.
+      Regularization is particularly important because TF–IDF creates a
+      high-dimensional feature space with many correlated predictors.
+      Ridge controls coefficient magnitude and improves generalization.
     </p>
   </section>
 
@@ -158,41 +345,56 @@ numeric_features = ["title_len", "word_count", "hour", "dayofweek", "month"]
     <h2>5. Results & Error Analysis</h2>
 
     <h3>Model Comparison (RMSE)</h3>
+    <p>
+      All regression models are evaluated on a held-out test set using
+      mean absolute error (MAE) and root mean squared error (RMSE).
+    </p>
     <img src="plots/model_comparison.png" alt="Model Comparison">
 
     <h3>Actual vs Predicted (Ridge)</h3>
+    <p>
+      The Ridge model’s predictions generally align with the diagonal,
+      especially for typical scores. The largest discrepancies occur for
+      extremely high-scoring posts, which are rare and hard to predict.
+    </p>
     <img src="plots/actual_vs_pred.png" alt="Actual vs Predicted">
 
     <h3>Residuals (Ridge)</h3>
+    <p>
+      Residual plots show that errors are centered around zero but have
+      a heavy tail, reflecting the underlying score distribution. The model
+      is well-calibrated on average but struggles with outlier posts.
+    </p>
     <img src="plots/residuals.png" alt="Residuals">
   </section>
 
   <section id="discussion">
     <h2>6. Discussion & Related Work</h2>
     <p>
-      Predicting social media engagement is a widely studied topic.
-      Similar work has used TF–IDF, temporal features, and subreddit/community metadata.
-      My results align with the literature: simple linear models capture broad patterns, 
-      but very high-scoring (viral) posts remain difficult to predict due to heavy-tailed behavior.
+      Predicting social media engagement has been studied on platforms such as
+      Reddit, Twitter, and news sites. Common approaches use text features
+      (bag-of-words or embeddings), temporal patterns, and community metadata.
+      My approach fits into this line of work by combining TF–IDF title features
+      with subreddit and time-of-post signals.
     </p>
 
     <h3>Key Takeaways</h3>
     <ul>
-      <li>Ridge regression outperformed all baselines and linear regression.</li>
-      <li>Text features carry substantial predictive power.</li>
-      <li>Score distribution is extremely skewed → hard to model extremes.</li>
+      <li>Ridge regression outperforms all baseline models and plain linear regression.</li>
+      <li>Text and subreddit identity carry substantial predictive power.</li>
+      <li>The heavy-tailed score distribution makes viral posts difficult to predict precisely.</li>
     </ul>
 
-    <h3>Future Work</h3>
+    <h3>Future Directions</h3>
     <ul>
-      <li>Try transformer-based text embeddings</li>
-      <li>Explore author features (post history)</li>
-      <li>Use robust loss functions to reduce sensitivity to outliers</li>
+      <li>Experiment with transformer-based text embeddings or pretrained language models.</li>
+      <li>Incorporate author history or comment dynamics as additional context.</li>
+      <li>Use robust loss functions or quantile regression for heavy-tailed targets.</li>
     </ul>
   </section>
 
   <footer>
-    © 2025 Reddit Score Prediction Project – Assignment 2
+    Reddit Score Prediction Project – Assignment 2
   </footer>
 
 </body>
