@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reddit Score Prediction – Assignment 2</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+      line-height: 1.65;
+      background: #fafafa;
+      color: #222;
+    }
+    h1, h2, h3 {
+      font-weight: 600;
+      margin-top: 2rem;
+    }
+    header {
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+    }
+    nav a {
+      margin-right: 1rem;
+      text-decoration: none;
+      color: #0366d6;
+      font-weight: 500;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    section {
+      margin-bottom: 3rem;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    img {
+      max-width: 100%;
+      border-radius: 6px;
+      margin: 1rem 0;
+    }
+    .code {
+      background: #f3f3f3;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      font-size: 0.9rem;
+      border: 1px solid #e0e0e0;
+    }
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      color: #777;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Predicting Reddit Post Scores</h1>
+    <p>158/258 Assignment 2 • Machine Learning for Data Science</p>
+    <nav>
+      <a href="#task">Task</a>
+      <a href="#eda">EDA</a>
+      <a href="#features">Features</a>
+      <a href="#models">Models</a>
+      <a href="#results">Results</a>
+      <a href="#discussion">Discussion</a>
+    </nav>
+  </header>
+
+  <section id="task">
+    <h2>1. Predictive Task</h2>
+    <p>
+      The objective of this project is to <strong>predict the final score</strong> 
+      (upvotes minus downvotes) of a Reddit post 
+      <strong>at the moment it is submitted</strong>.
+    </p>
+
+    <h3>Input Features Used</h3>
+    <ul>
+      <li>Post title (text)</li>
+      <li>Subreddit (categorical)</li>
+      <li>Title length (# of characters)</li>
+      <li>Word count (# of title words)</li>
+      <li>Posting hour, day of week, and month</li>
+    </ul>
+
+    <h3>Output</h3>
+    <p>
+      A numeric prediction of the Reddit post’s score (regression problem).
+    </p>
+  </section>
+
+  <section id="eda">
+    <h2>2. Data & Exploratory Analysis</h2>
+
+    <h3>Score Distribution</h3>
+    <p>The score distribution is highly skewed with a long right tail:</p>
+    <img src="plots/score_dist.png" alt="Score Distribution">
+
+    <h3>Subreddit Popularity</h3>
+    <p>
+      Subreddits vary widely in mean score and number of posts.
+      Larger communities produce more data but not necessarily higher mean scores.
+    </p>
+    <img src="plots/subreddit_stats.png" alt="Subreddit Stats">
+  </section>
+
+  <section id="features">
+    <h2>3. Feature Engineering & Preprocessing</h2>
+
+    <p>I extracted features that encode content, timing, and subreddit context.</p>
+
+    <h3>Final Feature Set</h3>
+    <div class="code">
+text_features = ["title"] → TF–IDF (max_features=5000)
+categorical_features = ["subreddit"] → OneHotEncoder(handle_unknown="ignore")
+numeric_features = ["title_len", "word_count", "hour", "dayofweek", "month"]
+    </div>
+
+    <p>
+      These transformations were combined using a 
+      <strong>ColumnTransformer</strong> inside a scikit-learn <strong>Pipeline</strong>.
+      This ensures no leakage from test data and a clean, reproducible workflow.
+    </p>
+  </section>
+
+  <section id="models">
+    <h2>4. Models</h2>
+    <p>I trained and compared several baseline models and two regression models:</p>
+
+    <h3>Baselines</h3>
+    <ul>
+      <li>Global mean baseline</li>
+      <li>Global median baseline</li>
+      <li>Subreddit mean baseline</li>
+    </ul>
+
+    <h3>Machine Learning Models</h3>
+    <ul>
+      <li><strong>Linear Regression</strong> – standard least squares</li>
+      <li><strong>Ridge Regression</strong> – L2 regularized linear model</li>
+    </ul>
+
+    <p>
+      Ridge helps avoid overfitting in the high-dimensional TF–IDF space.
+    </p>
+  </section>
+
+  <section id="results">
+    <h2>5. Results & Error Analysis</h2>
+
+    <h3>Model Comparison (RMSE)</h3>
+    <img src="plots/model_comparison.png" alt="Model Comparison">
+
+    <h3>Actual vs Predicted (Ridge)</h3>
+    <img src="plots/actual_vs_pred.png" alt="Actual vs Predicted">
+
+    <h3>Residuals (Ridge)</h3>
+    <img src="plots/residuals.png" alt="Residuals">
+  </section>
+
+  <section id="discussion">
+    <h2>6. Discussion & Related Work</h2>
+    <p>
+      Predicting social media engagement is a widely studied topic.
+      Similar work has used TF–IDF, temporal features, and subreddit/community metadata.
+      My results align with the literature: simple linear models capture broad patterns, 
+      but very high-scoring (viral) posts remain difficult to predict due to heavy-tailed behavior.
+    </p>
+
+    <h3>Key Takeaways</h3>
+    <ul>
+      <li>Ridge regression outperformed all baselines and linear regression.</li>
+      <li>Text features carry substantial predictive power.</li>
+      <li>Score distribution is extremely skewed → hard to model extremes.</li>
+    </ul>
+
+    <h3>Future Work</h3>
+    <ul>
+      <li>Try transformer-based text embeddings</li>
+      <li>Explore author features (post history)</li>
+      <li>Use robust loss functions to reduce sensitivity to outliers</li>
+    </ul>
+  </section>
+
+  <footer>
+    © 2025 Reddit Score Prediction Project – Assignment 2
+  </footer>
+
+</body>
+</html>
