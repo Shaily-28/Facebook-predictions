@@ -479,6 +479,48 @@ features(u, v):
       </li>
     </ul>
   </section>
+  <section id="references">
+  <h2>7. References</h2>
+
+  <ul>
+    <li>
+      <strong>Liben-Nowell, D., & Kleinberg, J. (2004).</strong>
+      <a href="https://www.cs.cornell.edu/home/kleinber/link-pred.pdf" target="_blank">
+        The Link Prediction Problem for Social Networks
+      </a>.
+      <br />
+      <em>Summary:</em> This foundational paper introduces the link prediction task and evaluates
+      structural similarity measures such as Common Neighbors, Jaccard, and AdamicAdar.
+      These heuristics directly motivate the four structural features used in our Facebook
+      link prediction models.
+    </li>
+    <br />
+
+    <li>
+      <strong>Leskovec, J., & McAuley, J. (2012).</strong>
+      <a href="https://cs.stanford.edu/people/jure/pubs/circles-nips12.pdf" target="_blank">
+        Learning to Discover Social Circles in Ego Networks
+      </a>.
+      <br />
+      <em>Summary:</em> This work analyzes Facebook ego networks and highlights the importance
+      of neighborhood structure, clustering, and social circles. Because our project uses the
+      SNAP Facebook dataset, this paper directly supports our EDA results on clustering
+      and structural patterns in the graph.
+    </li>
+    <br />
+
+    <li>
+      <strong>Watts, D. J., & Strogatz, S. H. (1998).</strong>
+      <a href="https://www.nature.com/articles/30918" target="_blank">
+        Collective dynamics of ‘small-world’ networks
+      </a>.
+      <br />
+      <em>Summary:</em> This paper introduced the small-world model, showing that real networks
+      exhibit short path lengths and high clustering. Our Facebook network analysis echoes
+      these properties through BFS distance sampling and clustering coefficient computation.
+    </li>
+  </ul>
+</section>
 
   <footer>
     Facebook Link Prediction Project – Assignment 2
