@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Reddit Score Prediction – Assignment 2</title>
+  <title>Facebook Link Prediction – Assignment 2</title>
   <style>
     :root {
-      --reddit-orange: #ff4500;
-      --reddit-dark: #1a1a1b;
-      --reddit-blue: #0079d3;
-      --bg-light: #f6f7f8;
+      --fb-blue: #1877f2;
+      --fb-blue-light: #42b0ff;
+      --fb-dark: #050505;
+      --bg-light: #f0f2f5;
       --card-bg: #ffffff;
-      --border-soft: #e1e4e8;
+      --border-soft: #e1e4ea;
     }
 
     * {
@@ -23,15 +23,15 @@
       margin: auto;
       padding: 2rem 1.5rem 3rem;
       line-height: 1.7;
-      background: radial-gradient(circle at top left, #ffe1d6 0, var(--bg-light) 40%, #eaf5ff 100%);
-      color: var(--reddit-dark);
+      background: radial-gradient(circle at top left, #dbe8ff 0, var(--bg-light) 40%, #e3f2ff 100%);
+      color: #1c1e21;
     }
 
     header {
       margin-bottom: 2.5rem;
       padding: 1.75rem 1.5rem 1.5rem;
       border-radius: 16px;
-      background: linear-gradient(120deg, var(--reddit-orange), #ff7a45, var(--reddit-blue));
+      background: linear-gradient(120deg, var(--fb-blue), #2851a3, var(--fb-blue-light));
       color: #fff;
       box-shadow: 0 10px 25px rgba(0,0,0,0.12);
       position: relative;
@@ -80,13 +80,13 @@
       padding: 0.35rem 0.7rem;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.55);
-      background: rgba(0,0,0,0.1);
+      background: rgba(0,0,0,0.08);
       backdrop-filter: blur(3px);
       transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
     }
 
     nav a:hover {
-      background: rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.20);
       transform: translateY(-1px);
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
@@ -141,8 +141,8 @@
       width: 4px;
       height: 100%;
       border-radius: 14px 0 0 14px;
-      background: linear-gradient(to bottom, var(--reddit-orange), var(--reddit-blue));
-      opacity: 0.7;
+      background: linear-gradient(to bottom, var(--fb-blue), var(--fb-blue-light));
+      opacity: 0.75;
     }
 
     section h2 {
@@ -223,10 +223,10 @@
 
 <body>
   <header>
-    <h1>Predicting Reddit Post Scores</h1>
+    <h1>Predicting Facebook Friendships</h1>
     <p>Assignment 2 • Data Mining and Recommender Systems</p>
     <p class="tagline">
-      Modeling how title text, subreddit, and posting time relate to Reddit post popularity.
+      Modeling how network structure in the Facebook friendship graph relates to the probability of a future connection.
     </p>
 
     <div class="members">
@@ -248,153 +248,240 @@
   <section id="task">
     <h2>1. Predictive Task</h2>
     <p>
-      The objective of this project is to <strong>predict the final score</strong>
-      (upvotes minus downvotes) of a Reddit post <strong>at the moment it is submitted</strong>.
-      This is framed as a supervised <strong>regression</strong> problem.
+      The objective of this project is to <strong>predict whether two Facebook users are friends</strong>
+      based solely on the structure of the social network. This is framed as a supervised
+      <strong>binary classification</strong> problem, also known as <strong>link prediction</strong>.
     </p>
 
-    <h3>Input Features</h3>
+    <h3>Input (Features)</h3>
+    <p>For each candidate pair of users \((u, v)\), we compute graph-based features derived from the current friendship network:</p>
     <ul>
-      <li>Post title (raw text)</li>
-      <li>Subreddit (categorical community identifier)</li>
-      <li>Title length: number of characters</li>
-      <li>Word count: number of words in the title</li>
-      <li>Posting time: hour of day, day of week, and month</li>
+      <li>Number of common friends (common neighbors)</li>
+      <li>Jaccard similarity of their friend sets</li>
+      <li>Preferential attachment score (product of degrees)</li>
+      <li>Adamic–Adar index (weighted common neighbors)</li>
     </ul>
 
     <h3>Target Variable</h3>
     <p>
-      The target is the Reddit <strong>score</strong> of each post, defined as:
+      The target label indicates whether an undirected edge between users <code>u</code> and <code>v</code> exists in the graph:
     </p>
     <div class="pill-row">
-      <span class="pill">score = upvotes − downvotes</span>
-      <span class="pill">real-valued output</span>
-      <span class="pill">heavy-tailed distribution</span>
+      <span class="pill">y = 1 → existing friendship (edge)</span>
+      <span class="pill">y = 0 → non-edge (randomly sampled pair)</span>
+      <span class="pill">Task type: classification</span>
     </div>
+
+    <h3>Evaluation Metrics</h3>
+    <p>
+      Since link prediction is fundamentally about <strong>ranking</strong> likely connections,
+      we evaluate using:
+    </p>
+    <ul>
+      <li><strong>ROC AUC</strong> – how well the model ranks true edges above non-edges.</li>
+      <li><strong>Average Precision (AP)</strong> – summarizing the precision–recall curve.</li>
+    </ul>
   </section>
 
   <section id="eda">
     <h2>2. Data & Exploratory Analysis</h2>
 
-    <h3>Score Distribution</h3>
+    <h3>Facebook Friendship Graph</h3>
     <p>
-      The score distribution is highly skewed with a long right tail:
-      most posts receive relatively modest scores, but a small fraction
-      of posts go "viral" and receive very high scores.
+      The dataset is the well-known <strong>Facebook combined</strong> friendship network.
+      Nodes represent users and undirected edges represent mutual friendships.
+      After loading the edge list, we obtained:
     </p>
-    <img src="plots/score_dist.png" alt="Score Distribution">
+    <ul>
+      <li><strong>4,039</strong> users (nodes)</li>
+      <li><strong>88,234</strong> friendships (edges)</li>
+      <li><strong>Average degree ≈ 43.7</strong></li>
+      <li><strong>Density ≈ 0.0108</strong> (sparse graph)</li>
+    </ul>
 
-    <h3>Subreddit Popularity</h3>
+    <h3>Degree Distribution</h3>
     <p>
-      Different subreddits exhibit very different typical scores and activity levels.
-      Some communities have higher mean scores but fewer posts, while others have
-      more moderate scores but large volumes of content.
+      We plot the degree distribution on linear, log, and log–log scales.
+      Most users have a moderate number of friends, while a few users act as hubs with very high degree.
+      The heavy tail in the log–log plot is consistent with <strong>scale-free</strong> behavior.
     </p>
-    <img src="plots/subreddit_stats.png" alt="Subreddit Statistics">
+    <img src="plots/degree_distribution.png" alt="Degree Distribution">
+
+    <h3>Clustering & Small-World Structure</h3>
+    <p>
+      Using a sample of 2,000 nodes, we computed local clustering coefficients.
+      The mean and median clustering are both around 0.6, indicating that
+      a user's friends are very likely to also be friends with each other.
+    </p>
+    <p>
+      We also approximated shortest path lengths using BFS from 40 random starting nodes.
+      The average shortest path is under 4 hops and the 90th percentile is around 5 hops,
+      confirming <strong>small-world</strong> behavior: short distances and high clustering.
+    </p>
+    <img src="plots/clustering_and_paths.png" alt="Clustering and Shortest Paths">
   </section>
 
   <section id="features">
     <h2>3. Feature Engineering & Preprocessing</h2>
 
     <p>
-      I construct a feature representation that captures content,
-      community context, and posting time. These features are combined
-      in a single scikit-learn <strong>Pipeline</strong>.
+      For each sampled pair of users \((u, v)\), we construct a compact feature vector
+      capturing the structural relationship between their neighborhoods in the graph.
+      These features are computed from the adjacency list representation of the network.
     </p>
 
     <h3>Final Feature Set</h3>
     <div class="code">
-text_features      = ["title"]         → TF–IDF (max_features = 5000, English stopwords)
-categorical_feats  = ["subreddit"]     → OneHotEncoder(handle_unknown = "ignore")
-numeric_features   = ["title_len", "word_count", "hour", "dayofweek", "month"]
+features(u, v):
+
+  Γ(u) = set of neighbors of u
+  Γ(v) = set of neighbors of v
+
+  1. Common Neighbors (CN)
+     CN(u, v) = |Γ(u) ∩ Γ(v)|
+
+  2. Jaccard Coefficient (J)
+     J(u, v) = |Γ(u) ∩ Γ(v)| / |Γ(u) ∪ Γ(v)|
+
+  3. Preferential Attachment (PA)
+     PA(u, v) = log(1 + deg(u) × deg(v))
+
+  4. Adamic–Adar Index (AA)
+     AA(u, v) = Σ<sub>w in Γ(u) ∩ Γ(v)</sub> 1 / log(1 + deg(w))
     </div>
 
     <p>
-      Numeric features use mean imputation for any missing values.
-      Text and categorical transformations are handled by a
-      <strong>ColumnTransformer</strong>, which keeps preprocessing
-      consistent between training and evaluation without leaking test data.
+      We construct a balanced dataset of <strong>20,000 positive edges</strong> and
+      <strong>20,000 negative pairs</strong>, compute the above features for each pair,
+      and then perform a stratified 70/30 train–test split.
     </p>
   </section>
 
   <section id="models">
     <h2>4. Models</h2>
-    <p>I evaluate simple baselines and two linear regression models:</p>
+    <p>
+      We evaluate both simple heuristics and three machine learning models for link prediction:
+    </p>
 
-    <h3>Baselines</h3>
+    <h3>Heuristic Baselines</h3>
     <ul>
-      <li><strong>Global mean baseline</strong> – always predicts the mean training score.</li>
-      <li><strong>Global median baseline</strong> – always predicts the median training score.</li>
-      <li><strong>Subreddit mean baseline</strong> – predicts the mean score for each subreddit.</li>
+      <li><strong>Common Neighbors</strong> – uses CN(u, v) directly as a score.</li>
+      <li><strong>Jaccard Coefficient</strong> – normalizes common neighbors by union size.</li>
+      <li><strong>Preferential Attachment</strong> – scores pairs by deg(u) × deg(v).</li>
+      <li><strong>Adamic–Adar</strong> – weighted common neighbors with degree discounting.</li>
     </ul>
+    <p>
+      These heuristics are widely used in network science and provide strong, interpretable baselines.
+    </p>
 
     <h3>Machine Learning Models</h3>
     <ul>
-      <li><strong>Linear Regression</strong> – least squares regression in the combined feature space.</li>
-      <li><strong>Ridge Regression</strong> – linear model with L2 regularization to reduce overfitting.</li>
+      <li>
+        <strong>Logistic Regression</strong> – a linear model over the four structural features.
+        It serves as a transparent baseline and allows us to see how each feature contributes.
+      </li>
+      <li>
+        <strong>Random Forest Classifier</strong> – an ensemble of decision trees
+        trained via bagging. It captures nonlinear interactions between features
+        and produces feature importance scores.
+      </li>
+      <li>
+        <strong>Gradient Boosting Classifier</strong> – a boosting-based ensemble
+        that adds trees sequentially, each correcting residual errors of the previous ones.
+        It is well-suited to ranking-style problems and often yields the best performance.
+      </li>
     </ul>
-
-    <p>
-      Regularization is particularly important because TF–IDF creates a
-      high-dimensional feature space with many correlated predictors.
-      Ridge controls coefficient magnitude and improves generalization.
-    </p>
   </section>
 
   <section id="results">
-    <h2>5. Results & Error Analysis</h2>
+    <h2>5. Results & Model Comparison</h2>
 
-    <h3>Model Comparison (RMSE)</h3>
+    <h3>Heuristic Performance</h3>
     <p>
-      All regression models are evaluated on a held-out test set using
-      mean absolute error (MAE) and root mean squared error (RMSE).
+      Using each structural feature individually as a score, we evaluate AUC and Average Precision
+      on the held-out test set. Common Neighbors, Jaccard, and Adamic–Adar all achieve very high
+      AUC/AP, while Preferential Attachment performs noticeably worse.
+    </p>
+    <img src="plots/heuristic_comparison.png" alt="Heuristic Comparison">
+
+    <h3>Machine Learning Models</h3>
+    <p>
+      All three classifiers — Logistic Regression, Random Forest, and Gradient Boosting —
+      achieve near-perfect performance on this dataset. The underlying reason is that the
+      structural features already capture very strong signals of friendship.
     </p>
     <img src="plots/model_comparison.png" alt="Model Comparison">
 
-    <h3>Actual vs Predicted (Ridge)</h3>
     <p>
-      The Ridge model’s predictions generally align with the diagonal,
-      especially for typical scores. The largest discrepancies occur for
-      extremely high-scoring posts, which are rare and hard to predict.
+      Gradient Boosting typically achieves the highest AUC and Average Precision,
+      with Random Forest close behind. Logistic Regression is competitive despite its simplicity,
+      which highlights how informative the four features are.
     </p>
-    <img src="plots/actual_vs_pred.png" alt="Actual vs Predicted">
 
-    <h3>Residuals (Ridge)</h3>
+    <h3>Score Distributions</h3>
     <p>
-      Residual plots show that errors are centered around zero but have
-      a heavy tail, reflecting the underlying score distribution. The model
-      is well-calibrated on average but struggles with outlier posts.
+      For the logistic regression model, we visualize the predicted probabilities for
+      positive vs. negative pairs. The distributions are well-separated: true edges cluster
+      near probability 1 and non-edges near probability 0, indicating excellent ranking quality.
     </p>
-    <img src="plots/residuals.png" alt="Residuals">
+    <img src="plots/score_distribution_lr.png" alt="Logistic Regression Scores">
+
+    <h3>Feature Importances</h3>
+    <p>
+      Both Random Forest and Gradient Boosting feature importance plots show that:
+    </p>
+    <ul>
+      <li><strong>Common Neighbors</strong> and <strong>Adamic–Adar</strong> are the most important features.</li>
+      <li><strong>Jaccard</strong> contributes additional signal.</li>
+      <li><strong>Preferential Attachment</strong> has the lowest importance.</li>
+    </ul>
+    <img src="plots/feature_importances.png" alt="Feature Importances">
   </section>
 
   <section id="discussion">
     <h2>6. Discussion & Related Work</h2>
     <p>
-      Predicting social media engagement has been studied on platforms such as
-      Reddit, Twitter, and news sites. Common approaches use text features
-      (bag-of-words or embeddings), temporal patterns, and community metadata.
-      My approach fits into this line of work by combining TF–IDF title features
-      with subreddit and time-of-post signals.
+      Link prediction on social networks has been widely studied in the context of
+      friend recommendation, graph mining, and network evolution. Classic approaches
+      rely on structural similarity scores such as common neighbors, Jaccard, and
+      Adamic–Adar — exactly the heuristics we use as baselines.
     </p>
 
     <h3>Key Takeaways</h3>
     <ul>
-      <li>Ridge regression outperforms all baseline models and plain linear regression.</li>
-      <li>Text and subreddit identity carry substantial predictive power.</li>
-      <li>The heavy-tailed score distribution makes viral posts difficult to predict precisely.</li>
+      <li>
+        Simple structural features derived from the Facebook friendship graph are
+        <strong>highly predictive</strong> of whether an edge exists.
+      </li>
+      <li>
+        Machine learning models (especially Gradient Boosting) slightly improve upon
+        individual heuristics, but the gains are modest because the heuristics are already very strong.
+      </li>
+      <li>
+        Feature importance analysis confirms that <strong>triadic closure</strong>
+        (friends-of-friends) is the dominant mechanism behind link formation in this network.
+      </li>
     </ul>
 
-    <h3>Future Directions</h3>
+    <h3>Limitations & Future Work</h3>
     <ul>
-      <li>Experiment with transformer-based text embeddings or pretrained language models.</li>
-      <li>Incorporate author history or comment dynamics as additional context.</li>
-      <li>Use robust loss functions or quantile regression for heavy-tailed targets.</li>
+      <li>
+        Our dataset is static; in reality, friendships form over time.
+        A more realistic setup would use <strong>temporal link prediction</strong>.
+      </li>
+      <li>
+        We treat all unobserved edges as negatives, which may mislabel some
+        future friendships. Temporal or probabilistic approaches could reduce this issue.
+      </li>
+      <li>
+        Extensions could include <strong>node embeddings</strong> (e.g., Node2Vec) or
+        <strong>Graph Neural Networks</strong> to capture higher-order structure.
+      </li>
     </ul>
   </section>
 
   <footer>
-    Reddit Score Prediction Project – Assignment 2
+    Facebook Link Prediction Project – Assignment 2
   </footer>
 
 </body>
